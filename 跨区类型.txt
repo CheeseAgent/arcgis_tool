@@ -1,0 +1,26 @@
+select osid,pac,count(*) from tmpm.a_hydl_city group by osid,pac
+
+select osid from (
+select osid,pac,count(*) from tmpm.a_hydl_city group by osid,pac) a where a.count > 1
+
+update tmpm.a_hydl_pro a set crosstype = '跨市' where osid in (
+select osid from (
+select osid,pac,count(*) from tmpm.a_hydl_city group by osid,pac) a where a.count > 1
+) and a.crosstype != '跨省' and a.state = '1'
+
+update tmpm.a_hydl_pro a set crosstype = '跨县' where osid in (
+select osid from (
+select osid,pac,count(*) from tmpm.a_hydl_county group by osid,pac) a where a.count > 1
+) and a.crosstype not in ('跨省','跨市') and a.state = '1'
+
+update tmpm.a_hydl_pro a set crosstype = '跨乡镇' where osid in (
+select osid from (
+select osid,pac,count(*) from tmpm.a_hydl_town group by osid,pac) a where a.count > 1
+)  and a.crosstype not in ('跨省','跨市','跨县') and a.state = '1'
+
+update tmpm.a_hydl_pro a set crosstype = '乡内' where osid in (
+select osid from (
+select osid,pac,count(*) from tmpm.a_hydl_town group by osid,pac) a where a.count = 1
+) and a.crosstype not in ('跨省','跨市','跨县','跨乡镇') and a.state = '1'
+   
+
